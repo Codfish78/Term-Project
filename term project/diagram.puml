@@ -1,0 +1,109 @@
+@startuml
+
+title CS665 - Thread Pool Pattern + Command Pattern UML
+
+' ======================================================
+' Interfaces
+' ======================================================
+
+interface HouseholdTask {
+    + execute(): void
+}
+
+' ======================================================
+' Thread Pool Pattern Classes
+' ======================================================
+
+class HouseholdScheduler {
+    - TaskQueue queue
+    - List<WorkerThread> workers
+    + HouseholdScheduler(workerCount: int)
+    + start(): void
+    + submit(task: HouseholdTask): void
+    + shutdown(): void
+}
+
+class WorkerThread {
+    - TaskQueue queue
+    - volatile boolean running
+    + WorkerThread(queue: TaskQueue, name: String)
+    + run(): void
+    + shutdown(): void
+}
+
+class TaskQueue {
+    - BlockingQueue<HouseholdTask> queue
+    + put(task: HouseholdTask): void
+    + take(): HouseholdTask
+}
+
+' ======================================================
+' Command Pattern - Concrete Tasks
+' ======================================================
+
+class CleanRoomTask {
+    - Path logFile
+    + execute(): void
+}
+
+class FeedCatTask {
+    - Path jsonFile
+    - Path logFile
+    + execute(): void
+}
+
+class LaundryTask {
+    - Path statusFile
+    - Path logFile
+    + execute(): void
+}
+
+class WaterPlantTask {
+    - Path status
+    - Path log
+    + execute(): void
+}
+
+class MakeLunchTask {
+    - Path ingredients
+    - Path log
+    + execute(): void
+}
+
+class WashDishesTask {
+    - Path status
+    - Path log
+    + execute(): void
+}
+
+' ======================================================
+' Main Application
+' ======================================================
+
+class Main {
+    + main(args: String[]): void
+}
+
+' ======================================================
+' Relationships
+' ======================================================
+
+' Thread Pool Links
+HouseholdScheduler --> TaskQueue : uses >
+HouseholdScheduler --> WorkerThread : creates >
+WorkerThread --> TaskQueue : takes tasks >
+WorkerThread --> HouseholdTask : executes >
+
+' Command Pattern inheritance
+HouseholdTask <|-- CleanRoomTask
+HouseholdTask <|-- FeedCatTask
+HouseholdTask <|-- LaundryTask
+HouseholdTask <|-- WaterPlantTask
+HouseholdTask <|-- MakeLunchTask
+HouseholdTask <|-- WashDishesTask
+
+' Main uses Scheduler
+Main --> HouseholdScheduler : creates >
+Main --> HouseholdTask : submits tasks >
+
+@enduml
